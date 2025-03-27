@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة العيد</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; direction: rtl; }
+        #game, #winnerScreen { display: none; }
+        button { padding: 10px; margin: 10px; font-size: 18px; }
+        .heart { color: red; font-size: 30px; }
+        .broken { opacity: 0.3; }
+        .winner { font-size: 24px; color: green; animation: winnerAnimation 1s infinite alternate; }
+        .crown { font-size: 40px; color: gold; }
+
+        @keyframes winnerAnimation {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>لعبة العيد 🎉</h1>
+    
+    <div id="start">
+        <h3>أدخل أسماء اللاعبين</h3>
+        <input type="text" id="player1" placeholder="اسم اللاعب 1">
+        <input type="text" id="player2" placeholder="اسم اللاعب 2">
+        <input type="text" id="player3" placeholder="اسم اللاعب 3">
+        <input type="text" id="player4" placeholder="اسم اللاعب 4">
+        <button onclick="startGame()">ابدأ</button>
+    </div>
+
+    <div id="game">
+        <h2 id="playerTurn"></h2>
+        <h3 id="question"></h3>
+        <input type="text" id="answer" placeholder="اكتب إجابتك">
+        <button onclick="checkAnswer()">إجابة</button>
+        <p id="result"></p>
+        <p id="hearts"></p>
+    </div>
+
+    <div id="winnerScreen">
+        <h2 id="winnerText"></h2>
+    </div>
+
+    <p class="footer">جميع الحقوق محفوظة لـ <b>ab_1d785</b></p>
+
+    <script>
+        let players = [];
+        let attempts = [4, 4, 4, 4];
+        let currentPlayer = 0;
+        let currentQuestion = 0;
+
+        const questions = [
+            { q: "ما هو عكس الليل؟", a: "النهار" },
+            { q: "كم عدد أركان الإسلام؟", a: "خمسة" },
+            { q: "ما هو لون السماء؟", a: "أزرق" }
+        ];
+
+        function startGame() {
+            players = [
+                document.getElementById("player1").value.trim(),
+                document.getElementById("player2").value.trim(),
+                document.getElementById("player3").value.trim(),
+                document.getElementById("player4").value.trim()
+            ];
+
+            if (players.some(name => name === "")) {
+                alert("رجاءً أدخل أسماء جميع اللاعبين!");
+                return;
+            }
+
+            document.getElementById("start").style.display = "none";
+            document.getElementById("game").style.display = "block";
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (attempts.filter(a => a > 0).length === 1) {
+                let winner = players[attempts.indexOf(Math.max(...attempts))];
+                document.getElementById("game").style.display = "none";
+                document.getElementById("winnerScreen").style.display = "block";
+                document.getElementById("winnerText").innerHTML = 
+                    `<span class="winner">${winner} 🏆</span><br><span class="crown">👑</span> مبروك!`;
+                return;
+            }
+
+            document.getElementById("playerTurn").innerText = `دور ${players[currentPlayer]}`;
+            document.getElementById("question").innerText = questions[currentQuestion].q;
+            document.getElementById("answer").value = "";
+            updateHearts();
+        }
+
+        function checkAnswer() {
+            let answer = document.getElementById("answer").value.trim();
+            if (answer === questions[currentQuestion].a) {
+                currentQuestion = (currentQuestion + 1) % questions.length;
+            } else {
+                attempts[currentPlayer]--;
+            }
+
+            if (attempts[currentPlayer] === 0) {
+                document.getElementById("result").innerHTML = `${players[currentPlayer]} خسر! ❌`;
+            }
+
+            currentPlayer = (currentPlayer + 1) % 4;
+            while (attempts[currentPlayer] === 0) {
+                currentPlayer = (currentPlayer + 1) % 4;
+            }
+
+            nextQuestion();
+        }
+
+        function updateHearts() {
+            let hearts = "";
+            for (let i = 0; i < 4; i++) {
+                hearts += `${players[i]}: `;
+                for (let j = 0; j < 4; j++) {
+                    hearts += j < attempts[i] ? "❤️" : "💔";
+                }
+                hearts += "<br>";
+            }
+            document.getElementById("hearts").innerHTML = hearts;
+        }
+    </script>
+
+</body>
+</html>
